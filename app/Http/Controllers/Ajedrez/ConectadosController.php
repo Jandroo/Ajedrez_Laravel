@@ -45,6 +45,7 @@ class ConectadosController extends Master
     function logout(Request $request){
         $token = $request->input('token');
         $status = User::where('token', $token)->update(array('token' => null)) ? 1 : 0;
+        header("Access-Control-Allow-Origin: *");
         return response(json_encode(["status" => $status]), 200)->header('Content-Type', 'application/json');
     }
 
