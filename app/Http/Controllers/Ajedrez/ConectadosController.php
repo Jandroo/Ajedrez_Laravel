@@ -20,6 +20,7 @@ class ConectadosController extends Master
 
             if(User::where([['id', Auth::id()], ['token', null]])->update(array('token' => $token))){
                 $estado = 1;
+                $mensaje = "Sesion iniciada.";
 
             }
             else{
@@ -46,6 +47,7 @@ class ConectadosController extends Master
 
         $token = $request->input('token');
         $estado = User::where('token', $token)->update(array('token' => null)) ? 1 : 0;
+        $mensaje = "Sesion cerrada.";
         header("Access-Control-Allow-Origin: *");
         return response(json_encode(["estado" => $estado]), 200)->header('Content-Type', 'application/json');
     }
