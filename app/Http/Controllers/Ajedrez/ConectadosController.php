@@ -36,7 +36,7 @@ class ConectadosController extends Master
 
         User::where('token', $token)->update(array('token' => null));
         $mensaje = "Sesion cerrada.";
-        return response(json_encode(["estado" => $estado]), 200)->header('Content-Type', 'application/json');
+        return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
 
@@ -44,27 +44,24 @@ class ConectadosController extends Master
 
 
         $id_usuario = $this->getIdUserFromToken($request->input('token'));
-        $estado = 0;
 
         header("Access-Control-Allow-Origin: *");
 
         if($id_usuario != false){
-            $estado = 1;
             $consulta = User::select("name")
                   ->where([["token", "<>", "null"],["id", "<>", $id_usuario]])
                   ->get();
-
             $usernames = [];
             foreach ($consulta as $value) {
                 $usernames[] = $value["name"];
             }
+            return response(json_encode(["usernames" => $usernames]), 200)->header('Content-Type', 'application/json');
         }
-        else $mensaje="No se ha econtrado el usuario.";
+        else{
+         $mensaje="No se ha econtrado el usuario.";
 
-        if($estado)
-            return response(json_encode(["estado" => $estado, "usernames" => $usernames]), 200)->header('Content-Type', 'application/json');
-        else
-            return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+        return response(json_encode(["id_usuario" => $id_usuario, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+        }
     }
 
     private function generateToken(){
