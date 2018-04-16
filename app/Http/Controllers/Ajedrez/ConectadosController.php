@@ -43,6 +43,7 @@ class ConectadosController extends Master
     }
 
     function logout(Request $request){
+
         $token = $request->input('token');
         $estado = User::where('token', $token)->update(array('token' => null)) ? 1 : 0;
         header("Access-Control-Allow-Origin: *");
@@ -51,8 +52,12 @@ class ConectadosController extends Master
 
 
     function verConectados(Request $request){
+
+
         $id_usuario = $this->getIdUserFromToken($request->input('token'));
         $estado = 0;
+
+        header("Access-Control-Allow-Origin: *");
 
         if($id_usuario != false){
             $estado = 1;
