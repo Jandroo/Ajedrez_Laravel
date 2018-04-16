@@ -17,38 +17,25 @@ class ConectadosController extends Master
         
         if (Auth::attempt(['email' => $email, 'password' => $password])){
             $token = $this->generateToken();
-
-            if(User::where([['id', Auth::id()], ['token', null]])->update(array('token' => $token))){
-                $estado = 1;
-                $mensaje = "Sesion iniciada.";
-
-            }
-            else{
-                $estado = 0;
-                if(User::where('email', $email)->update(array('token' => null)))
-                    $mensaje = "Esta cuenta ya esta logeada, se ha forzado el cierre de sesion, inicie sesion de nuevo.";
-                else
-                    $mensaje = "Esta cuenta ya esta logeada, se ha intentado forzar el cierre de session, pero ha fallado, intentelo de nuevo.";
-            }
+            User::where([['id', Auth::id()], ['token', null]])->update(array('token' => $token));
+            $mensaje = "Session Iniciada";
             
+            return response(json_encode(["mensaje" => $mensaje, "token" => $token]), 200)->header('Content-Type', 'application/json');
+        }else{
+            $mensaje = "Email o contraseña incorrecta";
+            return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
         }
-        else{
-            $estado = 0;
-            $mensaje = "Email o contraseña incorrecta.";
-        }
-
-        if($estado)
-            return response(json_encode(["estado" => $estado, "token" => $token]), 200)->header('Content-Type', 'application/json');
-        else
-            return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
     function logout(Request $request){
 
+        $id_usuario = $this->getIdUserFromToken($request->input('token'));
         $token = $request->input('token');
-        $estado = User::where('token', $token)->update(array('token' => null)) ? 1 : 0;
-        $mensaje = "Sesion cerrada.";
+
         header("Access-Control-Allow-Origin: *");
+
+        User::where('token', $token)->update(array('token' => null));
+        $mensaje = "Sesion cerrada.";
         return response(json_encode(["estado" => $estado]), 200)->header('Content-Type', 'application/json');
     }
 
