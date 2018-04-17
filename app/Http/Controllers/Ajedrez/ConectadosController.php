@@ -34,7 +34,7 @@ class ConectadosController extends Master
 
         header("Access-Control-Allow-Origin: *");
 
-        User::where('token', $token)->update(array('token' => null));
+        User::where('name', $token)->update(array('token' => null));
         $mensaje = "Sesion cerrada.";
         return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
@@ -58,9 +58,10 @@ class ConectadosController extends Master
             return response(json_encode(["usernames" => $usernames]), 200)->header('Content-Type', 'application/json');
         }
         else{
-         $mensaje="No se ha econtrado el usuario.";
 
-        return response(json_encode(["id_usuario" => $id_usuario, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+            $mensaje="No se ha econtrado el usuario.";
+
+            return response(json_encode(["id_usuario" => $id_usuario, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
         }
     }
 
