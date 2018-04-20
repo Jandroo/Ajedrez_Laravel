@@ -11,15 +11,14 @@ class ValidacionMovimiento
     switch ($ficha->tipo) {
         
         case 'torre':
-            return Movimientos::torre($ficha, $to);
+            return ValidacionMovimiento::torre($ficha, $to);
             break;
     }
     return false;
     }
     
 	private static function torre(Ficha $ficha, $to){
-		$num1 = $ficha->fila - $to['fila'];
-		$num2 = $ficha->columna - $to['columna'];
-		return ($num1 > -2 && $num1 < 2 && $num2 > -2 && $num2 < 2);
+        
+        return ($ficha->fila != $to['fila'] && $ficha->columna == $to['columna']) || ($ficha->fila == $to['fila'] && $ficha->columna != $to['columna']);
 	}
 }

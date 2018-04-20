@@ -7,6 +7,7 @@ use App\Http\Controllers\Master;
 use App\User;
 use App\Partida;
 use App\Ficha;
+use App\Http\Controllers\Ajedrez\ValidacionMovimiento;
 
 class TableroController extends Master
 {
@@ -46,21 +47,22 @@ class TableroController extends Master
 
         if($user != false && $user2 != false){
             $partida = Partida::select("id", "turno", "id_negro", "id_blanco")
-                        ->where([["id_negro", $user], 
-                        		["id_blanco", $user2]])
+            ->where([["id_negro", $user], 
+              ["id_blanco", $user2]])
 
-                        ->orWhere([["id_negro", $user2], 
-                        		["id_blanco", $user]]);
+            ->orWhere([["id_negro", $user2], 
+              ["id_blanco", $user]]);
             
             if($partida->count() == 1){
                 $partida = $partida->first();
                 
                 if(($partida->turno === "n" && $partida->id_negro == $user) || 
-                   ($partida->turno === "b" && $partida->id_blanco == $user)){
+                 ($partida->turno === "b" && $partida->id_blanco == $user)){
 
                     $ficha = Ficha::where([["id_partida", $partida->id], ["fila", $toFila], ["columna", $toColumna], ["color", $partida->turno]]);
 
-                    if($ficha->count() == 1){
+                if($ficha->count() == 1){
+                    if(ValidacionMovimiento::checkMovimiento($ficha->first(),["columna" => $fromColumna, "fila" => $fromFila])){
                         $fichaTarget = Ficha::where([["id_partida", $partida->id], ["fila", $fromFila], ["columna", $fromColumna]]);
 
                         if($fichaTarget->count() > 0){
@@ -70,7 +72,7 @@ class TableroController extends Master
                         }
                         else $fichaMia = false;
 
-                        //Fin partida
+                            //Fin partida
                         if(Ficha::where([["id_partida", $partida->id], ["color", ($partida->turno === "n" ? "b" : "n")], ["tipo", "rey"]])->count()==0){
                             $estado = 2;
                             $mensaje = "Fin de la partida, el ganador es el jugador ". ($partida->turno === "b" ? "blanco" : "negro");
@@ -79,7 +81,7 @@ class TableroController extends Master
                             $partida->delete();
 
                         }
-                        //Mover Ficha
+                            //Mover Ficha
                         else if(!$fichaMia){
                             $estado = 1;
                             $ficha = $ficha->first();
@@ -94,21 +96,19 @@ class TableroController extends Master
 
                         }
                         else $mensaje="No puedes mover tu ficha a un lugar donde hay otra ficha tuya.";
+                    }else $mensaje="Movimiento no permitido.";
 
-                    }
-                    else if($ficha->count() > 1) $mensaje="Se ha encontrado mas de 1 ficha en la misma casilla.";
-
-                    else $mensaje="No hay ninguna ficha tuya en la casilla seleccionada.";
-
-                }
-                else $mensaje = "No es tu turno.";
-
-            }
-            else $mensaje = "No se ha encontrado la partida.";
-
+                } else if($ficha->count() > 1) $mensaje="Se ha encontrado mas de 1 ficha en la misma casilla.";
+                else $mensaje="No hay ninguna ficha tuya en la casilla seleccionada.";
         }
-        else $mensaje="El usuario no quiere jugar.";
-        
-        return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+        else $mensaje = "No es tu turno.";
+
     }
+    else $mensaje = "No se ha encontrado la partida.";
+
+}
+else $mensaje="El usuario no quiere jugar.";
+
+return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+}
 }

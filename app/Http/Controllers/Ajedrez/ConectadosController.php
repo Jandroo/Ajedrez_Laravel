@@ -44,7 +44,7 @@ class ConectadosController extends Master
 
 
         $id_usuario = $this->getIdUserFromToken($request->input('token'));
-
+        
         header("Access-Control-Allow-Origin: *");
 
         if($id_usuario != false){
