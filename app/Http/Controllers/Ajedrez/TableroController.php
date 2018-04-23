@@ -16,6 +16,8 @@ class TableroController extends Master
         $user2 = $this->getIdUserFromName($request->input('name'));
         $estado = 0;
 
+        header("Access-Control-Allow-Origin: *");
+
         if($user != false && $user2 != false){
             $partida = Partida::select("id")->where([["id_negro", $user],["id_blanco", $user2]])->orWhere([["id_negro", $user2],["id_blanco", $user]]);
 
@@ -44,6 +46,8 @@ class TableroController extends Master
         $fromFila = $request->input('fromFila');
         $fromColumna = $request->input('fromColumna');
         $estado = 0;
+
+        header("Access-Control-Allow-Origin: *");
 
         if($user != false && $user2 != false){
             $partida = Partida::select("id", "turno", "id_negro", "id_blanco")
