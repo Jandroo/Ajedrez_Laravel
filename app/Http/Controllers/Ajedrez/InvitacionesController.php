@@ -16,6 +16,8 @@ class InvitacionesController extends Master
     	$user2 = $this->getIdUserFromName($request->input('name'));
     	$estado = 0;
 
+        header("Access-Control-Allow-Origin: *");
+
     	if($user != false && $user2 != false){
 
     		if(InvitacionesPartida::where([["id_usuario1", $user], ["id_usuario2", $user2]])->orWhere([["id_usuario1", $user2], ["id_usuario2", $user]])->count() == 0){
@@ -38,6 +40,8 @@ class InvitacionesController extends Master
     function ver(Request $request){
     	$id_usuario = $this->getIdUserFromToken($request->input('token'));
     	$estado = 0;
+
+        header("Access-Control-Allow-Origin: *");
 
     	if($id_usuario != false){
     		$estado = 1;
@@ -64,6 +68,8 @@ class InvitacionesController extends Master
         $respuesta = $request->input('respuesta');
         $estado = 0;
 
+        header("Access-Control-Allow-Origin: *");
+        
         if($user != false && $user2 != false){
             if($respuesta == 1){
                 $estado = 1;
