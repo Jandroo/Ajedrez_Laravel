@@ -14,7 +14,6 @@ class InvitacionesController extends Master
     function invitar(Request $request){
     	$user = $this->getIdUserFromToken($request->input('token'));
     	$user2 = $this->getIdUserFromName($request->input('name'));
-    	$estado = 0;
 
         header("Access-Control-Allow-Origin: *");
 
@@ -26,25 +25,19 @@ class InvitacionesController extends Master
 		    	$InvitacionesPartida->id_usuario1 = $user;
 		    	$InvitacionesPartida->id_usuario2 = $user2;
 		    	$InvitacionesPartida->save();
-		    	$estado = 1;
 		    	$mensaje="Se ha enviado la invitacion.";
 
-    		}
-    		else $mensaje="Esperando al usuario que acepte.";
     	}
-    	else $mensaje="El usuario no quiere jugar.";
-
-    	return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+    	else $mensaje="Esperando al usuario que acepte.";
+    	return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
     function ver(Request $request){
     	$id_usuario = $this->getIdUserFromToken($request->input('token'));
-    	$estado = 0;
 
         header("Access-Control-Allow-Origin: *");
 
     	if($id_usuario != false){
-    		$estado = 1;
     		$mensaje = InvitacionesPartida::from('users as u1')
     			->join('InvitacionesPartidas as ip', function($join){
                     $join->on('u1.id', '=', 'ip.id_usuario2');
@@ -59,20 +52,18 @@ class InvitacionesController extends Master
 
     	}else $mensaje="No se ha encontrado el usuario.";
 
-    	return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+    	return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
     function responder(Request $request){
         $user = $this->getIdUserFromToken($request->input('token'));
         $user2 = $this->getIdUserFromName($request->input('name'));
         $respuesta = $request->input('respuesta');
-        $estado = 0;
 
         header("Access-Control-Allow-Origin: *");
         
         if($user != false && $user2 != false){
             if($respuesta == 1){
-                $estado = 1;
                 InvitacionesPartida::where([["id_usuario1", $user2],["id_usuario2", $user]])->delete();
 
                 $partida = new Partida();
@@ -86,7 +77,6 @@ class InvitacionesController extends Master
 
             }
             else if($respuesta == 0){
-                $estado = 2;
                 InvitacionesPartida::where([["id_usuario1", $user],["id_usuario2", $user]])->delete();
                 $mensaje = "Solicitud rechazada!";
 
@@ -95,7 +85,7 @@ class InvitacionesController extends Master
         }
         else $mensaje="No se ha encontrado el usuario.";
         
-        return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+        return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
     private function insertarFicha($idPartida, $color, $tipoFicha, $fila, $columna){

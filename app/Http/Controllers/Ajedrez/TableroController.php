@@ -14,7 +14,6 @@ class TableroController extends Master
     function ver(Request $request){
         $user = $this->getIdUserFromToken($request->input('token'));
         $user2 = $this->getIdUserFromName($request->input('name'));
-        $estado = 0;
 
         header("Access-Control-Allow-Origin: *");
 
@@ -22,7 +21,6 @@ class TableroController extends Master
             $partida = Partida::select("id")->where([["id_negro", $user],["id_blanco", $user2]])->orWhere([["id_negro", $user2],["id_blanco", $user]]);
 
             if($partida->count() > 0){
-                $estado = 1;
                 $idPartida = $partida->first()->toArray()["id"];
                 $fichas = Ficha::select("color", "tipo", "fila", "columna")->where("id_partida", $idPartida)->get()->toArray();
 
@@ -32,10 +30,7 @@ class TableroController extends Master
         }
         else $mensaje="El usuario no quiere jugar.";
         
-        if($estado)
-            return response(json_encode(["estado" => $estado, "tablero" => $fichas]), 200)->header('Content-Type', 'application/json');
-        else
-            return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+        return response(json_encode(["tablero" => $fichas]), 200)->header('Content-Type', 'application/json');
     }
 
     function moverFicha(Request $request){
@@ -45,7 +40,6 @@ class TableroController extends Master
         $toColumna = $request->input('toColumna');
         $fromFila = $request->input('fromFila');
         $fromColumna = $request->input('fromColumna');
-        $estado = 0;
 
         header("Access-Control-Allow-Origin: *");
 
@@ -77,8 +71,7 @@ class TableroController extends Master
                         else $fichaMia = false;
 
                             //Fin partida
-                        if(Ficha::where([["id_partida", $partida->id], ["color", ($partida->turno === "n" ? "b" : "n")], ["tipo", "rey"]])->count()==0){
-                            $estado = 2;
+                        if(Ficha::where([["id_partida", $partida->id], ["color", ($partida->turno === "n" ? "b" : "n")], ["tipo", "torre"]])->count()==0){
                             $mensaje = "Fin de la partida, el ganador es el jugador ". ($partida->turno === "b" ? "blanco" : "negro");
 
                             Ficha::where("id_partida", $partida->id)->delete();
@@ -87,7 +80,6 @@ class TableroController extends Master
                         }
                             //Mover Ficha
                         else if(!$fichaMia){
-                            $estado = 1;
                             $ficha = $ficha->first();
                             $ficha->columna = $fromColumna;
                             $ficha->fila = $fromFila;
