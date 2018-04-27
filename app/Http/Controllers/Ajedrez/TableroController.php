@@ -22,7 +22,14 @@ class TableroController extends Master
 
             if($partida->count() > 0){
                 $idPartida = $partida->first()->toArray()["id"];
+                $partida = $partida->first()->toArray();
+                $idPartida = $partida["id"];
+                $turno = $partida["turno"];
                 $fichas = Ficha::select("color", "tipo", "fila", "columna")->where("id_partida", $idPartida)->get()->toArray();
+                $tablero = [
+                    "turno" => $turno,
+                    "fichas" => $fichas
+                ];
 
             }
             else $mensaje = "No se ha encontrado la partida.";
@@ -30,12 +37,12 @@ class TableroController extends Master
         }
         else $mensaje="El usuario no quiere jugar.";
         
-        return response(json_encode(["tablero" => $fichas]), 200)->header('Content-Type', 'application/json');
+        return response(json_encode(["tablero" => @$tablero]), 200)->header('Content-Type', 'application/json');
     }
 
     function moverFicha(Request $request){
-        $user = $this->getIdUserFromToken($request->input('token'));
-        $user2 = $this->getIdUserFromName($request->input('name'));
+        $user = User::getIdUserFromToken($request->input('token'));
+        $user2 = User::getIdUserFromName($request->input('name'));
         $toFila = $request->input('toFila');
         $toColumna = $request->input('toColumna');
         $fromFila = $request->input('fromFila');
@@ -55,7 +62,7 @@ class TableroController extends Master
                 $partida = $partida->first();
                 
                 if(($partida->turno === "n" && $partida->id_negro == $user) || 
-                 ($partida->turno === "b" && $partida->id_blanco == $user)){
+                   ($partida->turno === "b" && $partida->id_blanco == $user)){
 
                     $ficha = Ficha::where([["id_partida", $partida->id], ["fila", $toFila], ["columna", $toColumna], ["color", $partida->turno]]);
 
@@ -96,15 +103,15 @@ class TableroController extends Master
 
                 } else if($ficha->count() > 1) $mensaje="Se ha encontrado mas de 1 ficha en la misma casilla.";
                 else $mensaje="No hay ninguna ficha tuya en la casilla seleccionada.";
+            }
+            else $mensaje = "No es tu turno.";
+
         }
-        else $mensaje = "No es tu turno.";
+        else $mensaje = "No se ha encontrado la partida.";
 
     }
-    else $mensaje = "No se ha encontrado la partida.";
+    else $mensaje="No se ha podido obtener el usuario.";
 
-}
-else $mensaje="El usuario no quiere jugar.";
-
-return response(json_encode(["estado" => $estado, "mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
+    return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
 }
 }

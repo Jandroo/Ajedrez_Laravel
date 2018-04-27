@@ -19,8 +19,6 @@ class InvitacionesController extends Master
 
     	if($user != false && $user2 != false){
 
-    		if(InvitacionesPartida::where([["id_usuario1", $user], ["id_usuario2", $user2]])->orWhere([["id_usuario1", $user2], ["id_usuario2", $user]])->count() == 0){
-
     			$InvitacionesPartida = new InvitacionesPartida;
 		    	$InvitacionesPartida->id_usuario1 = $user;
 		    	$InvitacionesPartida->id_usuario2 = $user2;
@@ -28,7 +26,8 @@ class InvitacionesController extends Master
 		    	$mensaje="Se ha enviado la invitacion.";
 
     	}
-    	else $mensaje="Esperando al usuario que acepte.";
+        else $mensaje="Esperando al usuario que acepte.";
+
     	return response(json_encode(["mensaje" => $mensaje]), 200)->header('Content-Type', 'application/json');
     }
 
